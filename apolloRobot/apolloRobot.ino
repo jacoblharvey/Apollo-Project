@@ -1,7 +1,7 @@
 /**
  * Authors: Sharif Akil, Pamela Hernandez Villalba, Helena Holland, Brent Fairchild, Jacob Harvey
  * Date:    2020/10/21
- * Version: 0.6
+ * Version: 0.6.1
  * 
  * This program provides directions for our robot in order to complete the tasks
  * specified in https://github.com/jacoblharvey/Apollo-Project/blob/main/README.md
@@ -46,6 +46,12 @@ void setup() {
     
 }
 
+int readButton() {
+    int condition;
+    // TODO: implement function to halt program execution until button is pressed
+    return condition;
+}
+
 int checkDistance(int phase) {
     int condition;
     // generate 10-microsecond pulse to TRIG pin
@@ -85,8 +91,15 @@ int checkDistance(int phase) {
     return condition;
 }
 
+void executePhase(int phase);
+    // TODO: move main code blocks from loop() into seperate switch statements for each phase
+    //         this would ease the implementation of readButton() and simplify the main loop() program
+    return;
+}
+
 void loop() {
-    // TODO: implement button read to begin program
+    // TODO: call readButton
+    // TODO: call executePhase
     /**
      * Phase 1: travel to drop off point
      *   rotate wheel servos
