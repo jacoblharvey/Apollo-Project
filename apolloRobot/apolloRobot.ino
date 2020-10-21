@@ -1,7 +1,7 @@
 /**
  * Authors: Sharif Akil, Pamela Hernandez Villalba, Helena Holland, Brent Fairchild, Jacob Harvey
- * Date:    2020/10/18
- * Version: 0.5.2
+ * Date:    2020/10/21
+ * Version: 0.6
  * 
  * This program provides directions for our robot in order to complete the tasks
  * specified in https://github.com/jacoblharvey/Apollo-Project/blob/main/README.md
@@ -37,6 +37,13 @@ void setup() {
     frontSpike.attach(FRONT_PIN);
     rearSpike.attach(REAR_PIN);
     cubeDrop.attach(DROP_PIN);
+    // set servo values
+//leftWheel.write();
+//rightWheel.write();
+//frontSpike.write(); // initialize as raised for phase 1
+//rearSpike.write(); // initialize as lowered for phase 1
+//cubeDrop.write();
+    
 }
 
 int checkDistance(int phase) {
@@ -47,11 +54,11 @@ int checkDistance(int phase) {
     digitalWrite(TRIG_PIN, LOW);
 
     duration_us = pulseIn(ECHO_PIN, HIGH); // measure duration of pulse from ECHO pin and compute distance
-    distance_cm = 0.017 * duration_us;     // FIXME: serial monitor output fluctuates
+    distance_cm = 0.017 * duration_us;     // FIXME: serial monitor output jumps up by 2000 occasionally
 
     switch(phase) {
         case 1:
-            distanceThreshold = 20; // TODO: switch to microseconds to remove need for distance calculation
+            distanceThreshold = 10; // centimeters
             if(distance_cm >= distanceThreshold) { // 1 for within threshold, 0 for out of threshold
                 Serial.print(distance_cm);
                 Serial.println(" cm");
@@ -63,7 +70,7 @@ int checkDistance(int phase) {
             }
             break;
         case 3:
-            distanceThreshold = 10; // centimeters
+            distanceThreshold = 30; // centimeters
             if(distance_cm <= distanceThreshold) { // 0 for within threshold, 1 for out of threshold
                 Serial.print(distance_cm);
                 Serial.println(" cm");
@@ -80,7 +87,6 @@ int checkDistance(int phase) {
 
 void loop() {
     // TODO: implement button read to begin program
-    // TODO: implement phase 1
     /**
      * Phase 1: travel to drop off point
      *   rotate wheel servos
@@ -91,20 +97,20 @@ void loop() {
      */
     inRange = checkDistance(1);
     phaseStep = 1;
-//rearSpike.write(25); TODO: lower spike before moving
-    // main movement loop for phase 1
+    rearSpike.write(5);
+    Serial.println("Entering phase 1");
     while(inRange == 1) {
         switch(phaseStep) {
             case 1:
-                leftWheel.write(25);
-                rightWheel.write(25);
+                leftWheel.write(5);
+                rightWheel.write(5);
                 delay(500);
                 phaseStep = 2;
                 break;
             case 2:
-                leftWheel.write(100);
+                leftWheel.write(175); // FIXME: no delay between left wheel servo writes
                 delay(500);
-                rightWheel.write(100);
+                rightWheel.write(175);
                 delay(500);
                 phaseStep = 3;
                 break;
@@ -122,17 +128,20 @@ void loop() {
                 break;
         }
     }
-//rearSpike.write(100); // ver 0.5.1: once inRange = 0, program skips while loop and repeatedly sets servo to 25 then 100
-
-    // TODO: implement phase 2
     /**
      * Phase 2: drop cube at drop off point
+     *   raise rear spike
      *   rotate cubeDrop servo downwards
      *   wait for cube to slide off
      *   rotate cubeDrop servo upwards
+     *   lower front spike
      */
-
-    // TODO: implement phase 3
+    Serial.println("Entering phase 2");
+    rearSpike.write(175); // TODO: currently arbitrary values for servos, meet w/ Mark on Friday
+    cubeDrop.write(5);
+    delay(1000);
+    cubeDrop.write(175);
+    frontSpike.write(5);
     /**
      * Phase 3: travel toward base
      *   rotate wheel servos opposite direction of phase 1
@@ -141,4 +150,37 @@ void loop() {
      *   front spike up
      *   repeat until result = 0
      */
+    inRange = checkDistance(3); // reset inRange as = 1
+    phaseStep = 1; // reset phaseStep for phase 3
+    Serial.println("Entering phase 3");
+    while(inRange == 1) {
+        switch(phaseStep) {
+            case 1:
+                leftWheel.write(175);
+                rightWheel.write(175);
+                delay(500);
+                phaseStep = 2;
+                break;
+            case 2:
+                leftWheel.write(5);
+                delay(500);
+                rightWheel.write(5);
+                delay(500);
+                phaseStep = 3;
+                break;
+            case 3:
+                inRange = checkDistance(3);
+                Serial.print("Checking distance ... ");
+                Serial.println(inRange);
+                delay(250);
+                if(inRange != 0) {
+                    inRange = 1;
+                    phaseStep = 1;
+                } else {
+                    inRange = 0;
+                }
+                break;
+        }
+    }
+    frontSpike.write(175);
 }
