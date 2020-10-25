@@ -1,7 +1,7 @@
 /**
  * Authors: Sharif Akil, Pamela Hernandez Villalba, Helena Holland, Brent Fairchild, Jacob Harvey
  * Date:    2020/10/21
- * Version: 0.6.1
+ * Version: 0.6.2
  * 
  * This program provides directions for our robot in order to complete the tasks
  * specified in https://github.com/jacoblharvey/Apollo-Project/blob/main/README.md
@@ -17,7 +17,7 @@ const int RIGHT_PIN = 8;
 const int LEFT_PIN = 6;
 // spikes
 const int FRONT_PIN = 1;
-const int REAR_PIN = 10;
+const int REAR_PIN = 10; // TODO: remove rear spike manipulation from program
 // cube drop
 const int DROP_PIN = 7;
 // TODO: verify accuracy of rangefinder before final release
@@ -38,19 +38,18 @@ void setup() {
     rearSpike.attach(REAR_PIN);
     cubeDrop.attach(DROP_PIN);
     // set servo values
-//leftWheel.write();
-//rightWheel.write();
-//frontSpike.write(); // initialize as raised for phase 1
-//rearSpike.write(); // initialize as lowered for phase 1
-//cubeDrop.write();
-    
+    leftWheel.write(160);
+    rightWheel.write(20);
+    frontSpike.write(20); // initialize as raised for phase 1
+    rearSpike.write(80); // initialize as lowered for phase 1
+    cubeDrop.write(80);
 }
 
-int readButton() {
-    int condition;
-    // TODO: implement function to halt program execution until button is pressed
-    return condition;
-}
+//int readButton() {
+//    int condition;
+//    // TODO: implement function to halt program execution until button is pressed
+//    return condition;
+//}
 
 int checkDistance(int phase) {
     int condition;
@@ -60,6 +59,7 @@ int checkDistance(int phase) {
     digitalWrite(TRIG_PIN, LOW);
 
     duration_us = pulseIn(ECHO_PIN, HIGH); // measure duration of pulse from ECHO pin and compute distance
+    // TODO: phase out distance_cm 
     distance_cm = 0.017 * duration_us;     // FIXME: serial monitor output jumps up by 2000 occasionally
 
     switch(phase) {
@@ -76,7 +76,7 @@ int checkDistance(int phase) {
             }
             break;
         case 3:
-            distanceThreshold = 30; // centimeters
+            distanceThreshold = 100; // centimeters
             if(distance_cm <= distanceThreshold) { // 0 for within threshold, 1 for out of threshold
                 Serial.print(distance_cm);
                 Serial.println(" cm");
@@ -91,11 +91,11 @@ int checkDistance(int phase) {
     return condition;
 }
 
-void executePhase(int phase);
-    // TODO: move main code blocks from loop() into seperate switch statements for each phase
-    //         this would ease the implementation of readButton() and simplify the main loop() program
-    return;
-}
+//void executePhase(int phase);
+//    // TODO: move main code blocks from loop() into seperate switch statements for each phase
+//    //         this would ease the implementation of readButton() and simplify the main loop() program
+//    return;
+//}
 
 void loop() {
     // TODO: call readButton
@@ -110,20 +110,21 @@ void loop() {
      */
     inRange = checkDistance(1);
     phaseStep = 1;
-    rearSpike.write(5);
+    rearSpike.write(80);
     Serial.println("Entering phase 1");
     while(inRange == 1) {
         switch(phaseStep) {
             case 1:
-                leftWheel.write(5);
-                rightWheel.write(5);
+                leftWheel.write(160);
+                rightWheel.write(20);
                 delay(500);
                 phaseStep = 2;
                 break;
             case 2:
-                leftWheel.write(175); // FIXME: no delay between left wheel servo writes
                 delay(500);
-                rightWheel.write(175);
+                leftWheel.write(20);
+                delay(500);
+                rightWheel.write(160);
                 delay(500);
                 phaseStep = 3;
                 break;
@@ -150,11 +151,13 @@ void loop() {
      *   lower front spike
      */
     Serial.println("Entering phase 2");
-    rearSpike.write(175); // TODO: currently arbitrary values for servos, meet w/ Mark on Friday
-    cubeDrop.write(5);
     delay(1000);
-    cubeDrop.write(175);
-    frontSpike.write(5);
+    rearSpike.write(20);
+    cubeDrop.write(20);
+    delay(1000);
+    cubeDrop.write(80);
+    frontSpike.write(80);
+    delay(1000);
     /**
      * Phase 3: travel toward base
      *   rotate wheel servos opposite direction of phase 1
@@ -169,15 +172,16 @@ void loop() {
     while(inRange == 1) {
         switch(phaseStep) {
             case 1:
-                leftWheel.write(175);
-                rightWheel.write(175);
+                leftWheel.write(20);
+                rightWheel.write(160);
                 delay(500);
                 phaseStep = 2;
                 break;
             case 2:
-                leftWheel.write(5);
                 delay(500);
-                rightWheel.write(5);
+                leftWheel.write(160);
+                delay(500);
+                rightWheel.write(20);
                 delay(500);
                 phaseStep = 3;
                 break;
@@ -195,5 +199,5 @@ void loop() {
                 break;
         }
     }
-    frontSpike.write(175);
+    frontSpike.write(20);
 }
