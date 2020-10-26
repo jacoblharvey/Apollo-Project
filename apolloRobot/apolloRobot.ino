@@ -1,7 +1,7 @@
 /**
  * Authors: Sharif Akil, Pamela Hernandez Villalba, Helena Holland, Brent Fairchild, Jacob Harvey
- * Date:    2020/10/21
- * Version: 0.6.2
+ * Date:    2020/10/26
+ * Version: 0.6.3
  * 
  * This program provides directions for our robot in order to complete the tasks
  * specified in https://github.com/jacoblharvey/Apollo-Project/blob/main/README.md
@@ -15,16 +15,15 @@ const int ECHO_PIN = 4;
 // wheels
 const int RIGHT_PIN = 8;
 const int LEFT_PIN = 6;
-// spikes
+// spike
 const int FRONT_PIN = 1;
-const int REAR_PIN = 10; // TODO: remove rear spike manipulation from program
 // cube drop
 const int DROP_PIN = 7;
 // TODO: verify accuracy of rangefinder before final release
 int distanceThreshold, inRange, phaseStep;
 float duration_us, distance_cm;
 
-Servo leftWheel, rightWheel, frontSpike, rearSpike, cubeDrop;
+Servo leftWheel, rightWheel, frontSpike, cubeDrop;
 
 void setup() {
     Serial.begin(9600);
@@ -35,14 +34,12 @@ void setup() {
     rightWheel.attach(RIGHT_PIN);
     leftWheel.attach(LEFT_PIN);
     frontSpike.attach(FRONT_PIN);
-    rearSpike.attach(REAR_PIN);
     cubeDrop.attach(DROP_PIN);
     // set servo values
     leftWheel.write(160);
     rightWheel.write(20);
-    frontSpike.write(20); // initialize as raised for phase 1
-    rearSpike.write(80); // initialize as lowered for phase 1
-    cubeDrop.write(80);
+    frontSpike.write(20); // TODO: find nonarbitrary values for spike servo
+    cubeDrop.write(80); // TODO: find nonarbitrary values for cube servo
 }
 
 //int readButton() {
@@ -110,7 +107,7 @@ void loop() {
      */
     inRange = checkDistance(1);
     phaseStep = 1;
-    rearSpike.write(80);
+//frontSpike.write(
     Serial.println("Entering phase 1");
     while(inRange == 1) {
         switch(phaseStep) {
@@ -122,9 +119,13 @@ void loop() {
                 break;
             case 2:
                 delay(500);
+                frontSpike.write(50);
+                delay(500);
                 leftWheel.write(20);
                 delay(500);
                 rightWheel.write(160);
+                delay(500);
+                frontSpike.write(120);
                 delay(500);
                 phaseStep = 3;
                 break;
@@ -152,8 +153,7 @@ void loop() {
      */
     Serial.println("Entering phase 2");
     delay(1000);
-    rearSpike.write(20);
-    cubeDrop.write(20);
+    cubeDrop.write(-20);
     delay(1000);
     cubeDrop.write(80);
     frontSpike.write(80);
