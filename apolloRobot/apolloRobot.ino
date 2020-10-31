@@ -1,7 +1,7 @@
 /**
  * Authors: Sharif Akil, Pamela Hernandez Villalba, Helena Holland, Brent Fairchild, Jacob Harvey
  * Date:    2020/10/30
- * Version: 0.7
+ * Version: 1.0
  * 
  * This program provides directions for our robot in order to complete the tasks
  * specified in https://github.com/jacoblharvey/Apollo-Project/blob/main/README.md
@@ -16,10 +16,10 @@ const int ECHO_PIN = 4;
 const int RIGHT_PIN = 8;
 const int LEFT_PIN = 6;
 // spike
-const int FRONT_PIN = 1;
+const int FRONT_PIN = 2;
 // cube drop
 const int DROP_PIN = 7;
-// misc calculations and values
+// misc values
 int distanceThreshold, inRange, phaseStep, posL, posR;
 
 Servo leftWheel, rightWheel, frontSpike, cubeDrop;
@@ -36,14 +36,11 @@ void setup() {
     cubeDrop.attach(DROP_PIN);
     // initialize servo positions
     leftWheel.write(20);
-    rightWheel.write(160);
-//    frontSpike.write(); // TODO: find nonarbitrary values for spike servo
-//    cubeDrop.write(); // TODO: find nonarbitrary values for cube servo
-    // initialize servo iteration values
-    posL = 20;
-    posR = 160;
+    rightWheel.write(170);
+    frontSpike.write(100);
+    cubeDrop.write(50);
 
-Serial.println("Starting Run ...");
+    Serial.println("Starting Run ...");
 }
 
 //int readButton() {
@@ -54,34 +51,40 @@ Serial.println("Starting Run ...");
 
 int checkDistance(int phase) {
     int condition;
-    float reading;
+    float duration_us, distance_cm;
     // generate 10-microsecond pulse to TRIG pin and measure duration of pulse from ECHO pin
     digitalWrite(TRIG_PIN, HIGH);
     delayMicroseconds(10);
     digitalWrite(TRIG_PIN, LOW);
-    reading = pulseIn(ECHO_PIN, HIGH); // TODO: verify accuracy of rangefinder before final release
+    duration_us = pulseIn(ECHO_PIN, HIGH); // measure duration of pulse from ECHO pin and compute distance
+    distance_cm = 0.017 * duration_us;
+
     switch(phase) {
         case 1:
-distanceThreshold = 250; // TODO: find nonarbitrary values for phase 1 & 3 distance thresholds
-            if(reading >= distanceThreshold) { // 1 for within threshold, 0 for out of threshold
-                Serial.print("Reading: ");
-                Serial.println(reading);
+            distanceThreshold = 25;
+            if(distance_cm >= distanceThreshold) { // 1 for within threshold, 0 for out of threshold
+                Serial.print("Distance: ");
+                Serial.print(distance_cm);
+                Serial.println(" cm");
                 condition = 1;
             } else {
-                Serial.print("Reading: ");
-                Serial.println(reading);
+                Serial.print("Distance: ");
+                Serial.print(distance_cm);
+                Serial.println(" cm");
                 condition = 0;
             }
             break;
         case 3:
-distanceThreshold = 2000;
-            if(reading <= distanceThreshold) { // 0 for within threshold, 1 for out of threshold
-                Serial.print("Reading: ");
-                Serial.println(reading);
+            distanceThreshold = 125;
+            if(distance_cm <= distanceThreshold) { // 0 for within threshold, 1 for out of threshold
+                Serial.print("Distance: ");
+                Serial.print(distance_cm);
+                Serial.println(" cm");
                 condition = 1;
             } else {
-                Serial.print("Reading: ");
-                Serial.println(reading);
+                Serial.print("Distance: ");
+                Serial.print(distance_cm);
+                Serial.println(" cm");
                 condition = 0;
             }
             break;
@@ -101,9 +104,9 @@ void loop() {
     /**
      * Phase 1: travel to drop off point
      *   rotate wheel servos
-     *   rear spike down - might be able to just keep spike down for phase
+     *   front spike down
      *   reset wheel servos
-     *   rear spike up
+     *   front spike up
      *   repeat until result = 0
      */
     inRange = checkDistance(1);
@@ -112,7 +115,7 @@ void loop() {
     while(inRange == 1) {
         switch(phaseStep) {
             case 1:
-                posR = 160;
+                posR = 170;
                 for(posL = 20; posL <=160; posL += 1) { // rotate both servos simultaneously
                     leftWheel.write(posL);
                     rightWheel.write(posR);
@@ -124,21 +127,13 @@ void loop() {
                 break;
             case 2:
                 delay(500);
-frontSpike.write(50);
+                frontSpike.write(50);
+                delay(1000);
+                leftWheel.write(35);
                 delay(500);
-                //leftWheel.write(20);
-                for (int pos = 160; pos >= 20; pos -= 1) { // goes from 160 degrees to 20 degrees
-                    leftWheel.write(pos);
-                    delay(4); // ms, higher values slow rotation
-                }
-                delay(500);
-                //rightWheel.write(160);
-                for (int pos = 20; pos <= 160; pos += 1) { // goes from 20 degrees to 160 degrees
-                    rightWheel.write(pos);
-                    delay(4);
-                }
-                delay(500);
-frontSpike.write(120);
+                rightWheel.write(180);
+                delay(1000);
+                frontSpike.write(100);
                 delay(500);
                 phaseStep = 3;
                 break;
@@ -158,17 +153,15 @@ frontSpike.write(120);
     }
     /**
      * Phase 2: drop cube at drop off point
-     *   raise rear spike
      *   rotate cubeDrop servo downwards
      *   wait for cube to slide off
      *   rotate cubeDrop servo upwards
-     *   lower front spike
      */
     Serial.println("Entering phase 2 ...");
     delay(1000);
-    cubeDrop.write(20);
-    delay(1000);
-    cubeDrop.write(80);
+    cubeDrop.write(110);
+    delay(2000);
+    cubeDrop.write(50);
     delay(1000);
     /**
      * Phase 3: travel toward base
@@ -184,8 +177,8 @@ frontSpike.write(120);
     while(inRange == 1) {
         switch(phaseStep) {
             case 1:
-                posR = 20;
-                for(posL = 160; posL >=20; posL -= 1) {
+                posR = 65;
+                for(posL = 167; posL >=33; posL -= 1) {
                     leftWheel.write(posL);
                     rightWheel.write(posR);
                     delay(4); // ms, higher values slow rotation
@@ -196,21 +189,13 @@ frontSpike.write(120);
                 break;
             case 2:
                 delay(500);
-frontSpike.write(50);
+                frontSpike.write(50);
+                delay(1000);
+                leftWheel.write(167);
                 delay(500);
-                //leftWheel.write(20);
-                for (int pos = 20; pos <= 160; pos += 1) {
-                    leftWheel.write(pos);
-                    delay(4);
-                }
-                delay(500);
-                //rightWheel.write(160);
-                for (int pos = 160; pos >= 20; pos -= 1) {
-                    rightWheel.write(pos);
-                    delay(4);
-                }
-                delay(500);
-frontSpike.write(120);
+                rightWheel.write(20);
+                delay(1000);
+                frontSpike.write(100);
                 delay(500);
                 phaseStep = 3;
                 break;
