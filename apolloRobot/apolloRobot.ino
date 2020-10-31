@@ -1,7 +1,7 @@
 /**
  * Authors: Sharif Akil, Pamela Hernandez Villalba, Helena Holland, Brent Fairchild, Jacob Harvey
- * Date:    2020/10/30
- * Version: 1.0
+ * Date:    2020/10/31
+ * Version: 1.0.1
  * 
  * This program provides directions for our robot in order to complete the tasks
  * specified in https://github.com/jacoblharvey/Apollo-Project/blob/main/README.md
@@ -40,6 +40,19 @@ void setup() {
     frontSpike.write(100);
     cubeDrop.write(50);
 
+    Serial.println("");
+    Serial.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+    Serial.println("          AAAAAAAAAAA    PPPPPPPPP,      ,OOOOOOO,     LL             LL              ,OOOOOOO, ");
+    Serial.println("         AA       AA    PP       PP    OO       OO    LL             LL             OO       OO");
+    Serial.println("        AA       AA    PP       PP    OO       OO    LL             LL             OO       OO");
+    Serial.println("       AA       AA    PP       PP    OO       OO    LL             LL             OO       OO");
+    Serial.println("      AAAAAAAAAAA    PPPPPPPPP’     OO       OO    LL             LL             OO       OO");
+    Serial.println("     AA       AA    PP             OO       OO    LL             LL             OO       OO");
+    Serial.println("    AA       AA    PP             OO       OO    LL             LL             OO       OO");
+    Serial.println("   AA       AA    PP             OO       OO    LL             LL             OO       OO");
+    Serial.println("  AA       AA    PP              ‘OOOOOOO’      ’L'L'L'L'L     ’L'L'L'L'L     ’OOOOOOO’ ");
+    Serial.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+    Serial.println("");
     Serial.println("Starting Run ...");
 }
 
