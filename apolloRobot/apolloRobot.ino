@@ -1,7 +1,7 @@
 /**
  * Authors: Sharif Akil, Pamela Hernandez Villalba, Helena Holland, Brent Fairchild, Jacob Harvey
- * Date:    2020/11/02
- * Version: 1.0.2
+ * Date:    2020/11/08
+ * Version: 1.1
  * 
  * This program provides directions for our robot in order to complete the tasks
  * specified in https://github.com/jacoblharvey/Apollo-Project/blob/main/README.md
@@ -20,7 +20,7 @@ const int FRONT_PIN = 2;
 // cube drop
 const int DROP_PIN = 7;
 // misc values
-int distanceThreshold, inRange, phaseStep, posL, posR, state, timer;
+int distanceThreshold, inRange, phaseStep, posL, posR;
 
 Servo leftWheel, rightWheel, frontSpike, cubeDrop;
 
@@ -35,13 +35,13 @@ void setup() {
     frontSpike.attach(FRONT_PIN);
     cubeDrop.attach(DROP_PIN);
     // initialize servo positions
-    leftWheel.write(20);
-    rightWheel.write(170);
-    frontSpike.write(100);
-    cubeDrop.write(50);
-    // initialize state and timer
-    state = 0;
-    timer = 0;
+    frontSpike.write(65);
+    delay(500);
+    leftWheel.write(50);
+    rightWheel.write(150);
+    delay(500);
+    frontSpike.write(92);
+    cubeDrop.write(60);
 
     Serial.println("");
     Serial.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
@@ -59,15 +59,15 @@ void setup() {
     Serial.println("Starting Run ...");
 }
 
-int readButton() {
-    int condition = 0;
-    // TODO: implement function to halt program execution until button is pressed
+int checkButton() {
+    // TODO: install button and update values for function on Sunday
     int condition = 0;
     if(digitalRead(11) == 1) { // button is pressed
-        condition = 1;
-    } else {
         condition = 0;
+    } else {
+        condition = 1;
     }
+    condition = 1;
     return condition;
 }
 
@@ -83,7 +83,7 @@ int checkDistance(int phase) {
 
     switch(phase) {
         case 1:
-            distanceThreshold = 30; // centimeters
+            distanceThreshold = 20; // centimeters
             if(distance_cm >= distanceThreshold) { // 1 for within threshold, 0 for out of threshold
                 Serial.print("Distance: ");
                 Serial.print(distance_cm);
@@ -97,7 +97,7 @@ int checkDistance(int phase) {
             }
             break;
         case 3:
-            distanceThreshold = 130; // centimeters
+            distanceThreshold = 13000; // centimeters
             if(distance_cm <= distanceThreshold) { // 0 for within threshold, 1 for out of threshold
                 Serial.print("Distance: ");
                 Serial.print(distance_cm);
@@ -121,9 +121,8 @@ int checkDistance(int phase) {
 //}
 
 void loop() {
-    // TODO: call readButton
-    if(readButton() == 1) {
-        // implement phases 1-3
+    if(checkButton() == 1) {
+        // call executePhase for phases 1-3
         /**
          * Phase 1: travel to drop off point
          *   rotate wheel servos
@@ -138,9 +137,8 @@ void loop() {
         while(inRange == 1) {
             switch(phaseStep) {
                 case 1:
-                    posR = 163;
-                    // TODO: fix wheel syncing issues
-                    for(posL = 20; posL <=167; posL += 1) { // rotate both servos simultaneously
+                    posR = 150;
+                    for(posL = 50; posL <=140; posL += 1) { // rotate both servos simultaneously
                         leftWheel.write(posL);
                         rightWheel.write(posR);
                         delay(4);
@@ -151,13 +149,13 @@ void loop() {
                     break;
                 case 2:
                     delay(500);
-                    frontSpike.write(60);
+                    frontSpike.write(65);
                     delay(1000);
-                    leftWheel.write(35);
+                    leftWheel.write(50);
                     delay(500);
-                    rightWheel.write(180);
+                    rightWheel.write(175);
                     delay(1000);
-                    frontSpike.write(100);
+                    frontSpike.write(92);
                     delay(1000);
                     phaseStep = 3;
                     break;
@@ -183,14 +181,17 @@ void loop() {
          */
         Serial.println("Entering phase 2 ...");
         delay(1000);
-        frontSpike.write(50);
-        // TODO: reset wheels for phase 3 while spike is down
-        delay(3000);
-        cubeDrop.write(160);
-        delay(3000);
-        cubeDrop.write(50);
-        delay(3000);
-        frontSpike.write(100);
+        frontSpike.write(65);
+        delay(1000);
+        cubeDrop.write(125);
+        delay(1000);
+        cubeDrop.write(60);
+        delay(1000);
+        // set up wheels for phase 3
+        leftWheel.write(130);
+        rightWheel.write(90);
+        delay(1000);
+        frontSpike.write(92);
         delay(1000);
         /**
          * Phase 3: travel toward base
@@ -206,8 +207,8 @@ void loop() {
         while(inRange == 1) {
             switch(phaseStep) {
                 case 1:
-                    posR = 65;
-                    for(posL = 167; posL >=33; posL -= 1) {
+                    posR = 90;
+                    for(posL = 130; posL >=65; posL -= 1) {
                         leftWheel.write(posL);
                         rightWheel.write(posR);
                         delay(4); // ms, higher values slow rotation
@@ -218,13 +219,13 @@ void loop() {
                     break;
                 case 2:
                     delay(500);
-                    frontSpike.write(60);
+                    frontSpike.write(65);
                     delay(1000);
-                    leftWheel.write(167);
+                    leftWheel.write(130);
                     delay(500);
-                    rightWheel.write(20);
+                    rightWheel.write(75);
                     delay(1000);
-                    frontSpike.write(100);
+                    frontSpike.write(92);
                     delay(1000);
                     phaseStep = 3;
                     break;
@@ -243,7 +244,7 @@ void loop() {
             }
         }
     } else {
-        // skip loop 
+        // skip loop unless button is pressed
     }
     delay(100);
 }
