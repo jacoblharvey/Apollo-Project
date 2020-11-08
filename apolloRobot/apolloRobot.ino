@@ -1,7 +1,7 @@
 /**
  * Authors: Sharif Akil, Pamela Hernandez Villalba, Helena Holland, Brent Fairchild, Jacob Harvey
  * Date:    2020/11/08
- * Version: 1.1
+ * Version: 1.2
  * 
  * This program provides directions for our robot in order to complete the tasks
  * specified in https://github.com/jacoblharvey/Apollo-Project/blob/main/README.md
@@ -19,6 +19,8 @@ const int LEFT_PIN = 6;
 const int FRONT_PIN = 2;
 // cube drop
 const int DROP_PIN = 7;
+// button
+const int BUTTON_PIN = 5;
 // misc values
 int distanceThreshold, inRange, phaseStep, posL, posR;
 
@@ -41,7 +43,10 @@ void setup() {
     rightWheel.write(150);
     delay(500);
     frontSpike.write(92);
+    delay(500);
     cubeDrop.write(60);
+    // button
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
 
     Serial.println("");
     Serial.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
@@ -60,14 +65,12 @@ void setup() {
 }
 
 int checkButton() {
-    // TODO: install button and update values for function on Sunday
-    int condition = 0;
-    if(digitalRead(11) == 1) { // button is pressed
-        condition = 0;
-    } else {
+    int condition;
+    if(digitalRead(BUTTON_PIN) == 0) { // return 1 if button is pressed (reads LOW voltage)
         condition = 1;
+    } else {
+        condition = 0;
     }
-    condition = 1;
     return condition;
 }
 
@@ -83,7 +86,7 @@ int checkDistance(int phase) {
 
     switch(phase) {
         case 1:
-            distanceThreshold = 20; // centimeters
+            distanceThreshold = 30; // centimeters
             if(distance_cm >= distanceThreshold) { // 1 for within threshold, 0 for out of threshold
                 Serial.print("Distance: ");
                 Serial.print(distance_cm);
@@ -97,7 +100,7 @@ int checkDistance(int phase) {
             }
             break;
         case 3:
-            distanceThreshold = 13000; // centimeters
+            distanceThreshold = 130; // centimeters
             if(distance_cm <= distanceThreshold) { // 0 for within threshold, 1 for out of threshold
                 Serial.print("Distance: ");
                 Serial.print(distance_cm);
@@ -116,7 +119,7 @@ int checkDistance(int phase) {
 
 //void executePhase(int phase);
 //    // TODO: move main code blocks from loop() into seperate switch statements for each phase
-//    //         this would ease the implementation of readButton() and simplify the main loop() program
+//    //         this would ease the implementation of checkButton() and simplify the main loop() program
 //    return;
 //}
 
@@ -137,7 +140,7 @@ void loop() {
         while(inRange == 1) {
             switch(phaseStep) {
                 case 1:
-                    posR = 150;
+                    posR = 145;
                     for(posL = 50; posL <=140; posL += 1) { // rotate both servos simultaneously
                         leftWheel.write(posL);
                         rightWheel.write(posR);
@@ -243,8 +246,6 @@ void loop() {
                     break;
             }
         }
-    } else {
-        // skip loop unless button is pressed
     }
-    delay(100);
+    delay(200);
 }

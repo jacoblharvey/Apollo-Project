@@ -7,7 +7,7 @@ void setup() {
 
   pinMode(6, OUTPUT); //WHITE
   pinMode(7, OUTPUT); //RED
-  pinMode(8, INPUT_PULLUP); //BUTTON
+  pinMode(5, INPUT_PULLUP); //BUTTON
 
   stateC = 0;
   timerC = 0;
