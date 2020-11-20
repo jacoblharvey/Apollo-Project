@@ -18,3 +18,11 @@ This term project is for Introduction to Electrical Engineering
 3. Move back 1 meter to starting position
 4. ???
 5. Profit
+
+---
+##### More Details:
+
+We decided to break up the program into 3 phases, one each for Tasks
+1-3. The robot uses a rangefinder to compute a distance that is then
+compared to a distance threshold that decides when to progress into
+the next phase.

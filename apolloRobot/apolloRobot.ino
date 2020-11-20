@@ -1,7 +1,7 @@
 /**
  * Authors: Sharif Akil, Pamela Hernandez Villalba, Helena Holland, Brent Fairchild, Jacob Harvey
- * Date:    2020/11/08
- * Version: 1.2
+ * Date:    2020/11/19
+ * Version: 1.2.1
  * 
  * This program provides directions for our robot in order to complete the tasks
  * specified in https://github.com/jacoblharvey/Apollo-Project/blob/main/README.md
@@ -45,9 +45,9 @@ void setup() {
     frontSpike.write(92);
     delay(500);
     cubeDrop.write(60);
-    // button
+    // button pin
     pinMode(BUTTON_PIN, INPUT_PULLUP);
-
+    // print logo to serial monitor
     Serial.println("");
     Serial.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
     Serial.println("          AAAAAAAAAAA    PPPPPPPPP,      ,OOOOOOO,     LL             LL              ,OOOOOOO, ");
@@ -83,12 +83,11 @@ int checkDistance(int phase) {
     digitalWrite(TRIG_PIN, LOW);
     duration_us = pulseIn(ECHO_PIN, HIGH); // measure duration of pulse from ECHO pin and compute distance
     distance_cm = 0.017 * duration_us;
-
     switch(phase) {
         case 1:
             distanceThreshold = 30; // centimeters
             if(distance_cm >= distanceThreshold) { // 1 for within threshold, 0 for out of threshold
-                Serial.print("Distance: ");
+                Serial.print("Distance: "); // print distance to serial monitor
                 Serial.print(distance_cm);
                 Serial.println(" cm");
                 condition = 1;
@@ -117,15 +116,8 @@ int checkDistance(int phase) {
     return condition;
 }
 
-//void executePhase(int phase);
-//    // TODO: move main code blocks from loop() into seperate switch statements for each phase
-//    //         this would ease the implementation of checkButton() and simplify the main loop() program
-//    return;
-//}
-
 void loop() {
-    if(checkButton() == 1) {
-        // call executePhase for phases 1-3
+    if(checkButton() == 1) { // don't execute phases 1-3 until the button is pressed
         /**
          * Phase 1: travel to drop off point
          *   rotate wheel servos
@@ -134,6 +126,7 @@ void loop() {
          *   front spike up
          *   repeat until result = 0
          */
+        delay(1000);
         inRange = checkDistance(1);
         phaseStep = 1;
         Serial.println("Entering phase 1 ...");
@@ -141,10 +134,10 @@ void loop() {
             switch(phaseStep) {
                 case 1:
                     posR = 145;
-                    for(posL = 50; posL <=140; posL += 1) { // rotate both servos simultaneously
+                    for(posL = 50; posL <=140; posL += 1) {
                         leftWheel.write(posL);
                         rightWheel.write(posR);
-                        delay(4);
+                        delay(4); // ms, higher values slow rotation
                         posR -= 1;
                     }
                     delay(500);
@@ -214,7 +207,7 @@ void loop() {
                     for(posL = 130; posL >=65; posL -= 1) {
                         leftWheel.write(posL);
                         rightWheel.write(posR);
-                        delay(4); // ms, higher values slow rotation
+                        delay(4);
                         posR += 1;
                     }
                     delay(500);
